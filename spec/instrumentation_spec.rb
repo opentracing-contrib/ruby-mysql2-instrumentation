@@ -36,25 +36,49 @@ RSpec.describe Mysql2::Instrumentation do
       client.query("SELECT * FROM test_mysql2")
     end
 
-    it 'adds a span for a query' do
-      client.query("SELECT * FROM test_mysql2")
+    it 'adds a span for a query with tags' do
+      statement = "SELECT * FROM test_mysql2"
+      client.query(statement)
 
       expect(tracer.spans.count).to eq 1
+
+      expected_tags = {
+        'component' => 'mysql2',
+        'db.type' => 'mysql',
+        'span.kind' => 'client',
+        'db.instance' => client.query_options[:database],
+        'db.statement' => statement,
+        'db.user' => client.query_options[:username],
+      }
+      expect(tracer.spans.last.tags).to eq expected_tags
     end
   end
 
   describe 'failed query' do
     before do
-      allow(client).to receive(:query_original).and_raise("error")
+      allow(client).to receive(:query_original).and_raise('error')
     end
 
-    it 'sets the error tag' do
+    it 'sets the error tag and log' do
+      statement = "BAD_QUERY"
       begin
-        client.query("BAD QUERY")
+        client.query(statement)
       rescue => e
       end
 
-      expect(tracer.spans.last.tags['error']).to eq(true)
+      expected_tags = {
+        'component' => 'mysql2',
+        'db.type' => 'mysql',
+        'span.kind' => 'client',
+        'db.instance' => client.query_options[:database],
+        'db.statement' => statement,
+        'db.user' => client.query_options[:username],
+        'error' => true,
+      }
+      expect(tracer.spans.last.tags).to eq expected_tags
+
+      expect(tracer.spans.last.logs.last[:key]).to eq('message')
+      expect(tracer.spans.last.logs.last[:value]).to eq('error')
     end
   end
 end
