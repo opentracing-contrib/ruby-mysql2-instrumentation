@@ -1,8 +1,6 @@
 # Mysql2::Instrumentation
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/mysql2/instrumentation`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This gem provides OpenTracing autoinstrumentation for [Mysql2](https://github.com/brianmario/mysql2).
 
 ## Installation
 
@@ -22,7 +20,16 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Before creating a new Mysql2 client, add this code:
+
+```ruby
+require 'mysql2/instrumentation'
+
+Mysql2::Instrumentation.instrument(tracer: tracer)
+```
+
+`instrument` takes an optional parameter, `:tracer`, which sets the OpenTracing
+tracer to use. If one is not provided, the `OpenTracing.global_tracer` is used.
 
 ## Development
 
@@ -32,7 +39,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/mysql2-instrumentation.
+Bug reports and pull requests are welcome on GitHub at https://github.com/signalfx/mysql2-instrumentation.
 
 ## License
 
