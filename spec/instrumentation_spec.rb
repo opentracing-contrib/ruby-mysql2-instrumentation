@@ -20,7 +20,10 @@ RSpec.describe Mysql2::Instrumentation do
     allow_any_instance_of(Mysql2::Client).to receive(:query_original).and_return(Mysql2::Result.new)
   end
 
-  let (:client) { Mysql2::Client.new(:host => 'localhost', :database => 'test_sql2', :username => 'root') }
+  let (:host) { 'localhost '}
+  let (:database) { 'test_sql2 '}
+  let (:username) { 'root '}
+  let (:client) { Mysql2::Client.new(:host => host, :database => database, :username => username) }
 
   describe :instrument do
     it "patches the class's query method" do
@@ -46,9 +49,9 @@ RSpec.describe Mysql2::Instrumentation do
         'component' => 'mysql2',
         'db.type' => 'mysql',
         'span.kind' => 'client',
-        'db.instance' => client.query_options[:database],
+        'db.instance' => database,
         'db.statement' => statement,
-        'db.user' => client.query_options[:username],
+        'db.user' => username,
       }
       expect(tracer.spans.last.tags).to eq expected_tags
     end
@@ -70,9 +73,9 @@ RSpec.describe Mysql2::Instrumentation do
         'component' => 'mysql2',
         'db.type' => 'mysql',
         'span.kind' => 'client',
-        'db.instance' => client.query_options[:database],
+        'db.instance' => database,
         'db.statement' => statement,
-        'db.user' => client.query_options[:username],
+        'db.user' => username,
         'error' => true,
       }
       expect(tracer.spans.last.tags).to eq expected_tags
