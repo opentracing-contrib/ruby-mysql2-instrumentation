@@ -40,7 +40,7 @@ RSpec.describe Mysql2::Instrumentation do
     end
 
     it 'adds a span for a query with tags' do
-      statement = "SELECT * FROM test_mysql2"
+      statement = "SELECT * FROM test_mysql2" * 4096
       client.query(statement)
 
       expect(tracer.spans.count).to eq 1
@@ -51,7 +51,7 @@ RSpec.describe Mysql2::Instrumentation do
         'db.type' => 'mysql',
         'span.kind' => 'client',
         'db.instance' => database,
-        'db.statement' => statement,
+        'db.statement' => statement[0..1023],
         'db.user' => username,
       }
       expect(tracer.spans.last.tags).to eq expected_tags
@@ -75,7 +75,7 @@ RSpec.describe Mysql2::Instrumentation do
         'db.type' => 'mysql',
         'span.kind' => 'client',
         'db.instance' => database,
-        'db.statement' => statement,
+        'db.statement' => statement.to_s,
         'db.user' => username,
         'error' => true,
       }

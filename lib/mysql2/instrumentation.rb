@@ -28,10 +28,11 @@ module Mysql2
           alias_method :query_original, :query
 
           def query(sql, options = {})
+            statement = sql.respond_to?(:to_str) ? sql : sql.to_s
             tags = {
               'component' => 'mysql2',
               'db.instance' => @query_options.fetch(:database, ''),
-              'db.statement' => sql,
+              'db.statement' => statement[0, 1024],
               'db.user' => @query_options.fetch(:username, ''),
               'db.type' => 'mysql',
               'span.kind' => 'client',
